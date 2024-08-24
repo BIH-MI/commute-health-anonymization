@@ -15,15 +15,19 @@
  */
 package org.bihmi.commute;
 
-import org.deidentifier.arx.Data;
-import org.deidentifier.arx.DataHandle;
-import org.deidentifier.arx.DataSource;
-import org.deidentifier.arx.DataType;
-import org.deidentifier.arx.io.CSVDataOutput;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.deidentifier.arx.Data;
+import org.deidentifier.arx.DataHandle;
+import org.deidentifier.arx.DataHandleOutput;
+import org.deidentifier.arx.DataSource;
+import org.deidentifier.arx.DataType;
+import org.deidentifier.arx.io.CSVDataOutput;
 
 /**
  * IO-specific configuration
@@ -81,7 +85,23 @@ public class IO {
      * @throws IOException
      */
     public static void writeResult(DataHandle result, File output) throws IOException {
+        
+        // Filter out suppressed rows
+        Iterator<String[]> iter = result.iterator();
+        List<String[]> rows = new ArrayList<>();
+        rows.add(iter.next());
+        int rowNumber = 0;
+
+        // Convert
+        while (iter.hasNext()) {
+            String[] row = iter.next();
+            if (!(result instanceof DataHandleOutput) || !result.isOutlier(rowNumber)) {
+                rows.add(row);
+            }
+            rowNumber++;
+        }
+        
         CSVDataOutput writer = new CSVDataOutput(output, ',');
-        writer.write(result.iterator());
+        writer.write(rows.iterator());
     }
 }
