@@ -155,6 +155,14 @@ public class Util {
         
         // Convert data
         List<String[]> data = getData(handle);
+        
+        // Map to recreate the original positions later on
+        Map<String[], Integer> positions = new HashMap<String[], Integer>();
+        int index = 0;
+        for (String[] row : data) {
+            positions.put(row, index);
+            index++;
+        }
 
         // Sort
         Collections.sort(data, new Comparator<String[]>() {
@@ -214,8 +222,15 @@ public class Util {
             if (current == data.size()) {
                 break;
             }
-
         }
+        
+        // Recreate the original order
+        data.sort(new Comparator<String[]>() {
+            @Override
+            public int compare(String[] o1, String[] o2) {
+                return Integer.compare(positions.get(o1), positions.get(o2));
+            }
+        });
         
         // Return as handle
         return Data.create(data).getHandle();
