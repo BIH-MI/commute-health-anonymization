@@ -23,6 +23,8 @@ import java.time.format.DateTimeFormatter;
 
 import org.deidentifier.arx.ARXAnonymizer;
 import org.deidentifier.arx.ARXConfiguration;
+import org.deidentifier.arx.ARXListener;
+import org.deidentifier.arx.ARXProcessStatistics;
 import org.deidentifier.arx.ARXResult;
 import org.deidentifier.arx.AttributeType;
 import org.deidentifier.arx.Data;
@@ -75,17 +77,35 @@ public class Anon {
         config.setAlgorithm(ARXConfiguration.AnonymizationAlgorithm.BEST_EFFORT_BOTTOM_UP);
         config.setHeuristicSearchTimeLimit(30000);
         
+        // Status
+        System.out.println("Preparations completed");
+        
         // Timer
         Instant start = Instant.now();
 
         // Anonymize
         ARXAnonymizer anonymizer = new ARXAnonymizer();
         ARXResult result = anonymizer.anonymize(data, config);
+        
+        // Status
+        System.out.println("Initial anonymization performed");
 
+        // Optimize
         DataHandle output = result.getOutput();
+        ARXProcessStatistics statistics = result.getProcessStatistics();
         double oMin = 1d / 100d;
         try {
-            result.optimizeIterativeFast(output, oMin);
+        	statistics = statistics.merge(result.optimizeIterativeFast(output, oMin, new ARXListener() {
+            	int progress = -1;
+				@Override
+				public void progress(double arg0) {
+					int current = (int)(Math.round(arg0 * 100d));
+					if (current != progress) {
+						progress = current;
+						System.out.println("Optimizing. Progress: " + progress + "%");
+					}
+				}
+			}));
         } catch (RollbackRequiredException e) {
             throw new RuntimeException(e);
         }
@@ -100,8 +120,8 @@ public class Anon {
         LocalTime time = LocalTime.ofSecondOfDay(timeElapsed.getSeconds()).withNano(timeElapsed.getNano());
         System.out.println("Time taken: " + time.format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS")));
         
-        // Print statistics
-        System.out.println("Transformation schemes applied: " + result.getProcessStatistics().getSteps().size());
+        // Status
+        System.out.println("Transformation schemes applied: " + statistics.getNumberOfSteps());
         
         // Done
         return output;
