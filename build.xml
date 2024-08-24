@@ -5,7 +5,7 @@
     <!-- defines the to be included libraries -->
     <fileset id="lib.jars" dir="lib">
         <or>
-            <filename name="**/libarx-3.9.1.jar" />
+            <filename name="**/libarx-3.9.2.jar" />
             <filename name="**/commons-cli-1.9.0.jar" />
         </or>
     </fileset>
