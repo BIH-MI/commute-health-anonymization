@@ -1,6 +1,6 @@
 # Building the pipeline
 
-Build with Ant using the target 'jars'. Jar file will be placed in folder 'jars'.
+Build with Ant using the target 'jars'. The complied jar file will be placed in the folder 'jars'.
 
 # Executing the pipeline
 

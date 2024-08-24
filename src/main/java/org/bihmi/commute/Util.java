@@ -208,8 +208,8 @@ public class Util {
             	String[] values = commFromSch.split(",");
             	String value1 = values[0].trim();
             	String value2 = values[1].trim();
-            	commToSch = new Sampler(value1, commFromSchDistribution.get(value1), 
-            							value2, commFromSchDistribution.get(value2)).sample();
+            	commFromSch = new Sampler(value1, commFromSchDistribution.get(value1), 
+            							  value2, commFromSchDistribution.get(value2)).sample();
             }
 
             // Modify group
