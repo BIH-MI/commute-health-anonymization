@@ -136,7 +136,7 @@ public class Anon {
     	
     	// Specs
         double minAge = 8d;
-        double maxAge =  15.5d;
+        double maxAge =  16d;
         
         // Init
         HierarchyBuilderIntervalBased<Double> hierarchyBuilder = HierarchyBuilderIntervalBased.create(
@@ -177,8 +177,8 @@ public class Anon {
     private static AttributeType.Hierarchy getVO2MaxHierarchy(Data data) {
     	
     	// Specs
-        double minValue = 30d;
-        double maxValue =  65d;
+        double minValue = 25d;
+        double maxValue =  60d;
         double intervalRange = 2.5d;
 
         // Init
@@ -208,8 +208,8 @@ public class Anon {
     private static AttributeType.Hierarchy getMVPAHierarchy(Data data) {
     	
     	// Specs
-        double minValue = 8d;
-        double maxValue =  50d;
+        double minValue = 0d;
+        double maxValue =  60d;
         double intervalRange = .5d;
 
         // Init
@@ -241,8 +241,8 @@ public class Anon {
     private static AttributeType.Hierarchy getDistToSchoolHierarchy(Data data) {
     	
     	// Specs
-        double minValue = 0d;
-        double maxValue =  22500d;
+        double minValue = 50d;
+        double maxValue =  45000d;
         double intervalRange = 2d;
 
         // Init
@@ -274,8 +274,8 @@ public class Anon {
     private static AttributeType.Hierarchy getDistFromSchoolHierarchy(Data data) {
     	
     	// Specs
-        double minValue = 130d;
-        double maxValue =  22270d;
+        double minValue = 50d;
+        double maxValue =  45000d;
         double intervalRange = 2d;
 
         // Init
