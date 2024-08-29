@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 import org.deidentifier.arx.ARXAnonymizer;
 import org.deidentifier.arx.ARXConfiguration;
@@ -27,6 +28,7 @@ import org.deidentifier.arx.ARXListener;
 import org.deidentifier.arx.ARXProcessStatistics;
 import org.deidentifier.arx.ARXResult;
 import org.deidentifier.arx.AttributeType;
+import org.deidentifier.arx.AttributeType.MicroAggregationFunction;
 import org.deidentifier.arx.Data;
 import org.deidentifier.arx.DataHandle;
 import org.deidentifier.arx.DataType;
@@ -48,11 +50,22 @@ public class Anon {
      * @throws IOException
      */
     public static DataHandle anonymizeCommuteData(Data data) throws IOException {
+        
+        // Prepare microaggregation for commute categories
+        int commToSchIndex = data.getHandle().getColumnIndexOf(IO.FIELD_COMMUTE_TO_SCHOOL);
+        int commFromSchIndex = data.getHandle().getColumnIndexOf(IO.FIELD_COMMUTE_FROM_SCHOOL);
+        Map<String, Double> commToSch = data.getHandle().getStatistics().getFrequencyDistribution(commToSchIndex).asMap();
+        Map<String, Double> commFromSch = data.getHandle().getStatistics().getFrequencyDistribution(commFromSchIndex).asMap();
+        
+        // Seed for drawing
+        long seed = 0xDEADBEEF;
     	
         // Specify transformation rules
         data.getDefinition().setAttributeType(IO.FIELD_COMMUTE_FROM_SCHOOL, getCommuteHierarchy(data));
+        data.getDefinition().setMicroAggregationFunction(IO.FIELD_COMMUTE_FROM_SCHOOL, MicroAggregationFunction.createModeWithDistributionFallback(commFromSch, seed), true);
         data.getDefinition().setMaximumGeneralization(IO.FIELD_COMMUTE_FROM_SCHOOL, 2);
         data.getDefinition().setAttributeType(IO.FIELD_COMMUTE_TO_SCHOOL, getCommuteHierarchy(data));
+        data.getDefinition().setMicroAggregationFunction(IO.FIELD_COMMUTE_TO_SCHOOL, MicroAggregationFunction.createModeWithDistributionFallback(commToSch, seed), true);
         data.getDefinition().setMaximumGeneralization(IO.FIELD_COMMUTE_TO_SCHOOL, 2);
         data.getDefinition().setAttributeType(IO.FIELD_DISTANCE_TO_SCHOOL, getDistToSchoolHierarchy(data));
         data.getDefinition().setMicroAggregationFunction(IO.FIELD_DISTANCE_TO_SCHOOL, AttributeType.MicroAggregationFunction.createArithmeticMean(), true);
@@ -109,10 +122,6 @@ public class Anon {
         } catch (RollbackRequiredException e) {
             throw new RuntimeException(e);
         }
-
-        // Make sure to output fine-grained commute categories
-        Util util = new Util(result.getInput());
-        output = util.reapplyCommuteCategories(output);
         
         // Timer
         Instant end = Instant.now();
